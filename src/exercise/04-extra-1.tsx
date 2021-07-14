@@ -10,8 +10,30 @@ import {
 import type {Squares} from '../tic-tac-toe-utils'
 
 function Board() {
-  // Square の型を指定したうえで、状態変数を初期化する
-  const [squares, setSquares] = React.useState<Squares>(Array(9).fill(null))
+  /**
+   * Lazy Initialization を行う
+   * そのまま指定すると、再レンダリングのたびに初期化されてしまうため
+   */
+  const [squares, setSquares] = React.useState<Squares>(() => {
+    let localStorageValue
+    try {
+      localStorageValue = JSON.parse(
+        window.localStorage.getItem('squares') ?? 'null',
+      )
+    } catch (error: unknown) {
+      // try something
+    }
+
+    if (localStorageValue) {
+      return localStorageValue
+    } else {
+      return Array(9).fill(null)
+    }
+  })
+
+  React.useEffect(() => {
+    window.localStorage.setItem('squares', JSON.stringify(squares))
+  }, [squares])
 
   const nextValue = calculateNextValue(squares)
   const winner = calculateWinner(squares)

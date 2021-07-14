@@ -3,6 +3,39 @@
 
 import * as React from 'react'
 
+/**
+ * localStorage APIと同じ引数の形にしておけば使いやすい
+ */
+function useLocalStorageState(key: string, defaultValue: string = '') {
+  const [state, setState] = React.useState(
+    () => window.localStorage.getItem(key) || defaultValue,
+  )
+
+  // useEffect内で使用している状態変数は必ず指定する
+  React.useEffect(() => {
+    window.localStorage.setItem(key, state)
+  }, [key, state])
+
+  /**
+   * as const をつけない場合
+   *
+   * 配列内で指定されている要素の型の配列と認識される
+   * [
+   *    state:    string
+   *    setState: React.Dispatch<React.SetStateAction<string>>
+   * ]
+   *
+   * つまり as const をつけない場合は、state 変数の型が
+   * setState の型に解釈されうる余地が発生する
+   * (string | React.Dispatch<React.SetStateAction<string>>)[]
+   *
+   * as const の場合
+   * [string, React.Dispatch<React.SetStateAction<string>>]
+   */
+
+  return [state, setState] as const
+}
+
 function UsernameForm({
   initialUsername = '',
   onSubmitUsername,
@@ -10,17 +43,12 @@ function UsernameForm({
   initialUsername?: string
   onSubmitUsername: (username: string) => void
 }) {
-  // localStorageを見て確認する
-  // initialValue のみだと再描画の際に必ず空文字で更新されてしまう
-  const [username, setUsername] = React.useState(
-    window.localStorage.getItem('username') || initialUsername,
+  // localStorage APIを使ったキャッシュの保存をカスタムフック化
+  const [username, setUsername] = useLocalStorageState(
+    'username',
+    initialUsername,
   )
   const [touched, setTouched] = React.useState(false)
-
-  // 再描画、つまり username が更新されるごとに実行される
-  React.useEffect(() => {
-    window.localStorage.setItem('username', username)
-  })
 
   const usernameIsLowerCase = username === username.toLowerCase()
   const usernameIsLongEnough = username.length >= 3

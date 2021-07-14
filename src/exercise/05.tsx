@@ -29,6 +29,7 @@ function UsernameForm({
   // 🦺 useRef is a generic function and the type you pass is the type of value
   // you intend to store in the ref. Since we plan to store the <input /> in this
   // ref, you'll use HTMLInputElement
+  const usernameInputRef = React.useRef<HTMLInputElement>(null)
 
   // 🐨 Add a useEffect here. Whenever the `displayErrorMessage` state changes,
   // we want to call `focus()` on usernameInputRef.current if
@@ -38,6 +39,9 @@ function UsernameForm({
   // 🦉 you'll get a linting warning if you try to include `usernameInputRef`
   // or `usernameInputRef.current`.
   // 📜 Learn more: https://epicreact.dev/why-you-shouldnt-put-refs-in-a-dependency-array
+  React.useEffect(() => {
+    if (displayErrorMessage) usernameInputRef.current?.focus()
+  }, [displayErrorMessage])
 
   let errorMessage = null
   if (!usernameIsLowerCase) {

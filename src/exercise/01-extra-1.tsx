@@ -4,21 +4,20 @@
 import * as React from 'react'
 
 function UsernameForm({
+  initialUsername = '',
   onSubmitUsername,
 }: {
+  initialUsername?: string
   onSubmitUsername: (username: string) => void
 }) {
-  // 🐨 call useState here to get the `username` state and `setUsername` updater function
-  const [username, setUsername] = React.useState('')
+  const [username, setUsername] = React.useState(initialUsername)
 
   function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault()
-    // 🐨 call `onSubmitUsername` with the `username` state
     onSubmitUsername(username)
   }
 
   function handleChange(event: React.ChangeEvent<HTMLInputElement>) {
-    // 🐨 call setUsername with the event.currentTarget.value
     setUsername(event.currentTarget.value)
   }
 
@@ -26,7 +25,12 @@ function UsernameForm({
     <form name="usernameForm" onSubmit={handleSubmit}>
       <div>
         <label htmlFor="usernameInput">Username:</label>
-        <input id="usernameInput" type="text" onChange={handleChange} />
+        <input
+          id="usernameInput"
+          type="text"
+          value={username}
+          onChange={handleChange}
+        />
       </div>
       <button type="submit">Submit</button>
     </form>
@@ -38,7 +42,10 @@ function App() {
     alert(`You entered: ${username}`)
   return (
     <div style={{width: 400}}>
-      <UsernameForm onSubmitUsername={onSubmitUsername} />
+      <UsernameForm
+        onSubmitUsername={onSubmitUsername}
+        initialUsername="kody"
+      />
     </div>
   )
 }

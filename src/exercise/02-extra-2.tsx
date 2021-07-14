@@ -10,17 +10,32 @@ function UsernameForm({
   initialUsername?: string
   onSubmitUsername: (username: string) => void
 }) {
-  // localStorageを見て確認する
-  // initialValue のみだと再描画の際に必ず空文字で更新されてしまう
+  console.log('rendering')
+
   const [username, setUsername] = React.useState(
-    window.localStorage.getItem('username') || initialUsername,
+    () => window.localStorage.getItem('username') || initialUsername,
   )
   const [touched, setTouched] = React.useState(false)
 
-  // 再描画、つまり username が更新されるごとに実行される
+  // 初回レンダリングのみ実行したい場合
+  // React.useEffect(() => {
+  //   console.log('calling useEffect')
+  //   window.localStorage.setItem('username', username)
+  // }, [])
+
+  // 状態変数 username が更新された時に実行したい場合
   React.useEffect(() => {
+    console.log('calling useEffect')
     window.localStorage.setItem('username', username)
-  })
+  }, [username])
+  /**
+   * shallow comparison を実行する
+   * Object.is / ===
+   * つまり、[username, {sample: "object"}] は
+   * 2つ目の要素がオブジェクトであり、参照は変更されて
+   * しまうと、プロパティが一緒でも異なると判定されて
+   * 再レンダリングが実行される
+   */
 
   const usernameIsLowerCase = username === username.toLowerCase()
   const usernameIsLongEnough = username.length >= 3

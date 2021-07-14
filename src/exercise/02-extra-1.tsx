@@ -10,10 +10,21 @@ function UsernameForm({
   initialUsername?: string
   onSubmitUsername: (username: string) => void
 }) {
+  console.log('rendering')
+
+  /**
+   *
+   */
+
   // localStorageを見て確認する
   // initialValue のみだと再描画の際に必ず空文字で更新されてしまう
   const [username, setUsername] = React.useState(
-    window.localStorage.getItem('username') || initialUsername,
+    // localStorage APIは同期的な呼び出しである
+    //
+    () => {
+      console.log('getting initialValue')
+      return window.localStorage.getItem('username') || initialUsername
+    },
   )
   const [touched, setTouched] = React.useState(false)
 

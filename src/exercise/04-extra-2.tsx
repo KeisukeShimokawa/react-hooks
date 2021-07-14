@@ -2,6 +2,7 @@
 // http://localhost:3000/isolated/exercise/04.tsx
 
 import * as React from 'react'
+import {useLocalStorageState} from '../utils'
 import {
   calculateStatus,
   calculateNextValue,
@@ -10,8 +11,14 @@ import {
 import type {Squares} from '../tic-tac-toe-utils'
 
 function Board() {
-  // Square の型を指定したうえで、状態変数を初期化する
-  const [squares, setSquares] = React.useState<Squares>(Array(9).fill(null))
+  /**
+   * Lazy Initialization を行う
+   * そのまま指定すると、再レンダリングのたびに初期化されてしまうため
+   */
+  const [squares, setSquares] = useLocalStorageState<Squares>(
+    'squares',
+    Array(9).fill(null),
+  )
 
   const nextValue = calculateNextValue(squares)
   const winner = calculateWinner(squares)

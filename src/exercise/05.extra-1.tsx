@@ -5,31 +5,69 @@
 import * as React from 'react'
 import VanillaTilt from 'vanilla-tilt'
 
+/**
+ * 既存の型に対して、追加のプロパティを設定したい場合には、
+ * インターフェースを継承すれば問題なし
+ */
+interface HTMLVAnillaTiltElement extends HTMLDivElement {
+  vanillaTilt: VanillaTilt
+}
+
 function Tilt({children}: {children: React.ReactNode}) {
-  // 🐨 create a ref here with React.useRef()
+  /**
+   * 用途に合わせて、React.useRef で取得した参照に対して、
+   * current で取得できる値の型を指定する必要あり
+   *
+   * 初期値に null を指定することで、後の処理で undefined になって
+   * しまうことを防ぐようにしている
+   */
+  const tiltRef = React.useRef<HTMLVAnillaTiltElement>(null)
 
-  // 🐨 add a `React.useEffect` callback here and use VanillaTilt to make your
-  // div look fancy.
-  // 💰 like this:
-  // const tiltNode = tiltRef.current
-  // VanillaTilt.init(tiltNode, {
-  //   max: 25,
-  //   speed: 400,
-  //   glare: true,
-  //   'max-glare': 0.5,
-  // })
-  //
-  // 🐨 Don't forget to return a cleanup function. VanillaTilt.init will add an
-  // object to your DOM node to cleanup:
-  // `return () => tiltNode.vanillaTilt.destroy()`
-  //
-  // 💰 Don't forget to specify your effect's dependencies array! In our case
-  // we know that the tilt node will never change, so make it `[]`. Ask me about
-  // this for a more in depth explanation.
+  /**
+   * このタイミングでは、tiltRef は undefined になってしまう
+   * Reactでは実際にDOMが構築されるのは render 関数が実行される
+   * タイミングであるため、関数の実行時にはDOMは構築されていないためである
+   */
+  console.log(tiltRef.current)
 
-  // 🐨 add the `ref` prop to the `tilt-root` div here:
+  /**
+   * DOMに対してアクセスしたい場合には、DOMの構築が終了した後で実行される
+   * ライブイベント内で処理を実行する必要がある
+   */
+  React.useEffect(() => {
+    /**
+     * tiltRef.current のようなアクセス方法は、以下のようにそれぞれの
+     * キー名と値で取得することができる
+     */
+    const {current: tiltNode} = tiltRef
+    /**
+     * tiltNode は null の可能性もあるため、型ガードをしておく必要あり
+     */
+    if (tiltNode === null) return
+    const vanillaTiltOptions = {
+      max: 25,
+      speed: 400,
+      glare: true,
+      'max-glare': 0.5,
+    }
+    VanillaTilt.init(tiltNode, vanillaTiltOptions)
+
+    /**
+     * useEffect の引数で指定したコールバック関数の中で、
+     * 返り値に指定した関数は、クリーンアップ処理時、つまり
+     * DOMが削除される前に呼び出されるメソッドになる
+     */
+    return () => {
+      tiltNode.vanillaTilt.destroy()
+    }
+    /**
+     * tiltNode のライフサイクルの中で変更しないので、最初の1回のみ
+     * 処理を実行するように設定している
+     */
+  }, [])
+
   return (
-    <div className="tilt-root">
+    <div ref={tiltRef} className="tilt-root">
       <div className="tilt-child">{children}</div>
     </div>
   )
